@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.0.2] - 2026-05-08
+
+### Fixed
+- Shortened `pubspec.yaml` description to satisfy the pub.dev 180-character limit.
+- Added dartdoc comments to all public API fields (`AppAdaptiveForeground`,
+  `AppButtonIosAndroid`, `AppIosButton`) to exceed the 20 % documentation threshold.
+
+---
+
 ## [0.0.1] - 2026-05-08
 
 ### Added

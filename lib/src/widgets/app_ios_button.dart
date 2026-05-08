@@ -20,6 +20,7 @@ class AppIosButton extends StatelessWidget {
   /// SF Symbol name (e.g. `'square.and.arrow.up'`).
   final String symbol;
 
+  /// Called when the button is tapped. Pass `null` to disable.
   final VoidCallback? onPressed;
 
   /// Tint colour applied to the symbol and button glass.

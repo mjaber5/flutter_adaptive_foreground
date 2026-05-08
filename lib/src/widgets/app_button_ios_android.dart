@@ -24,9 +24,16 @@ class AppButtonIosAndroid extends StatelessWidget {
   /// Material icon — used on Android / other platforms.
   final IconData? icon;
 
+  /// Called when the button is tapped. Pass `null` to disable the button.
   final VoidCallback? onPressed;
+
+  /// When `true`, renders a bordered outline style on Android.
   final bool isOutline;
+
+  /// Tint / foreground color applied to the icon and button surface.
   final Color? color;
+
+  /// Custom tap-target size. Defaults to `AppDimensions.iconXL - 6`.
   final double? buttonSize;
 
   @override

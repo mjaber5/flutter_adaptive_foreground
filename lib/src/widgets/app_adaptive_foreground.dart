@@ -12,13 +12,44 @@ import 'package:flutter/services.dart';
 /// 1. [backgroundColorHint]: Direct luminance calculation (Fast).
 /// 2. [samplingKey]: Backdrop sampling via [RepaintBoundary] (Advanced/Throttled).
 class AppAdaptiveForeground extends StatefulWidget {
+  /// The widget subtree that receives the adaptive foreground color.
   final Widget child;
+
+  /// A known background color used for instant luminance calculation.
+  ///
+  /// Use this when the background is a solid, known color at build time
+  /// (e.g. a `Scaffold` background). For dynamic backgrounds prefer
+  /// [samplingKey] + [enableBackdropSampling].
   final Color? backgroundColorHint;
+
+  /// Key of a [RepaintBoundary] whose rendered pixels are sampled.
+  ///
+  /// Must be set together with [enableBackdropSampling].
   final GlobalKey? samplingKey;
+
+  /// When `true`, periodically captures the [RepaintBoundary] identified by
+  /// [samplingKey] and computes luminance from the actual rendered pixels.
+  ///
+  /// Works with gradients, images, and animated backgrounds.
+  /// Sampling frequency is controlled by [samplingInterval].
   final bool enableBackdropSampling;
+
+  /// How often the backdrop is sampled. Defaults to 150 ms.
   final Duration samplingInterval;
+
+  /// Foreground color used on bright (high-luminance) backgrounds.
+  ///
+  /// Defaults to [Colors.black].
   final Color darkColor;
+
+  /// Foreground color used on dark (low-luminance) backgrounds.
+  ///
+  /// Defaults to [Colors.white].
   final Color lightColor;
+
+  /// Luminance threshold that separates dark from bright backgrounds.
+  ///
+  /// A value of `0.5` treats mid-grey as the switch point. Defaults to `0.5`.
   final double threshold;
 
   /// Dead zone on either side of [threshold] that prevents oscillation when
@@ -48,8 +79,17 @@ class AppAdaptiveForeground extends StatefulWidget {
     this.systemOverlayStyle,
   });
 
+  /// When `true`, only the widget's own bounding box is sampled rather than
+  /// the full repaint boundary. Defaults to `true`.
   final bool sampleLocalArea;
+
+  /// When `true`, writes the resolved [SystemUiOverlayStyle] to the
+  /// [AnnotatedRegion] so the status-bar icons match the foreground color.
   final bool updateStatusBar;
+
+  /// Manual override for the resolved [SystemUiOverlayStyle].
+  ///
+  /// When set, this style is used instead of the automatically derived one.
   final SystemUiOverlayStyle? systemOverlayStyle;
 
   /// Access the current adaptive foreground color from descendants
