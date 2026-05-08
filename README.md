@@ -212,3 +212,13 @@ flutter run
 ## License
 
 [MIT](LICENSE) © 2026 Mohammed Jaber
+
+---
+
+## Author
+
+**Mohammed Jaber**
+
+[![GitHub](https://img.shields.io/badge/GitHub-mjaber5-181717?logo=github)](https://github.com/mjaber5)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Mohammad%20Jaber-0077B5?logo=linkedin)](https://www.linkedin.com/in/mohammad-jaber-profile/)
+[![Email](https://img.shields.io/badge/Email-mhammdjbr555%40gmail.com-EA4335?logo=gmail)](mailto:mhammdjbr555@gmail.com)

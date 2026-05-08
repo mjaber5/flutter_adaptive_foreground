@@ -1,0 +1,21 @@
+# Build artifacts
+build/
+.dart_tool/
+.idea/
+.vscode/
+*.iml
+
+# Leftover Flutter app scaffolding — not part of the package
+android/
+ios/
+
+# Raw video — only the GIF is needed for the README
+assets/demo.mov
+
+# Lock file — not published for packages
+pubspec.lock
+
+# Metadata
+.metadata
+.flutter-plugins
+.flutter-plugins-dependencies
