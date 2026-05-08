@@ -9,6 +9,10 @@ selects the highest-contrast foreground color — **black or white** — based o
 the luminance of the rendered background, and optionally keeps the system
 status-bar icons in sync.
 
+<p align="center">
+  <img src="assets/demo.gif" alt="adaptive_foreground demo" width="320"/>
+</p>
+
 ---
 
 ## Features
