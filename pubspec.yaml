@@ -1,0 +1,26 @@
+name: adaptive_foreground
+description: >-
+  Adaptive foreground color (black/white) for Flutter. Automatically adjusts
+  status-bar style and widget foreground based on background luminance, with
+  optional live backdrop sampling via RepaintBoundary.
+version: 0.0.1
+
+repository: https://github.com/mjaber5/flutter_adaptive_foreground
+issue_tracker: https://github.com/mjaber5/flutter_adaptive_foreground/issues
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+  flutter: ">=3.27.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_native: ^0.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
