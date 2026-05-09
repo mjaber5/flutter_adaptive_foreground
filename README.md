@@ -33,7 +33,7 @@ status-bar icons in sync.
 
 ```yaml
 dependencies:
-  adaptive_foreground: ^0.0.1
+  adaptive_foreground: ^0.0.2
 ```
 
 ```dart
