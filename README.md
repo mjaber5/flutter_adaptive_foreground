@@ -9,7 +9,7 @@ Adaptive foreground color and glassy navigation bar for Flutter. Includes:
 2. **`AdaptiveNavBar`**: A pixel-perfect, pure Flutter replica of Apple App Store's adaptive bottom navigation bar system. It reads the content scrolling beneath it, adapting its surface blur, label tint, and active highlight pills dynamically.
 
 <p align="center">
-  <img src="assets/demo.gif" alt="adaptive_foreground demo" width="320"/>
+  <img src="https://raw.githubusercontent.com/mjaber5/flutter_adaptive_foreground/main/assets/demo.gif" alt="adaptive_foreground demo" width="320"/>
 </p>
 
 ---
