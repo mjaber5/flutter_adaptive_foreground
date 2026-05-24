@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:adaptive_foreground/src/widgets/app_dimensions.dart';
 import 'package:adaptive_foreground/src/widgets/app_ios_button.dart';
 import 'package:flutter/foundation.dart';
@@ -89,44 +90,60 @@ class _AndroidActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final size = buttonSize ?? AppDimensions.iconXL - 6;
+
+    // Use the color property as the foreground color.
+    // If null, fall back to the theme's onSurface color.
+    final fgColor = color ?? colorScheme.onSurface;
+    final isDarkBackground = fgColor.computeLuminance() > 0.5;
+
+    // Adaptive glassy background/border properties
     final backgroundColor = isOutline
         ? Colors.transparent
-        : color ?? colorScheme.surfaceContainerHighest;
-    final foregroundColor = isOutline
-        ? color ?? colorScheme.primary
-        : _foregroundFor(backgroundColor, colorScheme);
+        : (isDarkBackground
+            ? Colors.black.withValues(alpha: 0.35)
+            : Colors.white.withValues(alpha: 0.65));
+
     final borderColor = isOutline
-        ? foregroundColor.withValues(alpha: 0.35)
-        : colorScheme.onSurface.withValues(alpha: 0.1);
+        ? fgColor.withValues(alpha: 0.35)
+        : (isDarkBackground
+            ? Colors.white.withValues(alpha: 0.08)
+            : Colors.black.withValues(alpha: 0.06));
 
     return Semantics(
       button: true,
       enabled: onPressed != null,
       child: SizedBox.square(
         dimension: size,
-        child: Material(
-          color: backgroundColor,
-          shape: CircleBorder(side: BorderSide(color: borderColor)),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            customBorder: const CircleBorder(),
-            onTap: onPressed,
-            child: Icon(
-              icon,
-              size: AppDimensions.iconSM,
-              color: foregroundColor,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(size / 2),
+          child: BackdropFilter(
+            filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeInOut,
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                shape: BoxShape.circle,
+                border: Border.all(color: borderColor, width: 0.8),
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: onPressed,
+                  child: Center(
+                    child: Icon(
+                      icon,
+                      size: AppDimensions.iconSM,
+                      color: fgColor,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ),
       ),
     );
-  }
-
-  Color _foregroundFor(Color bg, ColorScheme colorScheme) {
-    if (bg == colorScheme.primary) return colorScheme.onPrimary;
-    if (bg == colorScheme.surfaceContainerHighest || bg == colorScheme.surface) {
-      return colorScheme.onSurface;
-    }
-    return bg.computeLuminance() > 0.5 ? Colors.black : Colors.white;
   }
 }

@@ -4,10 +4,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Flutter](https://img.shields.io/badge/Flutter-≥3.27-blue.svg)](https://flutter.dev)
 
-Adaptive foreground color for Flutter. `AppAdaptiveForeground` automatically
-selects the highest-contrast foreground color — **black or white** — based on
-the luminance of the rendered background, and optionally keeps the system
-status-bar icons in sync.
+Adaptive foreground color and glassy navigation bar for Flutter. Includes:
+1. **`AppAdaptiveForeground`**: Automatically selects the highest-contrast foreground color — **black or white** — based on the luminance of the rendered background.
+2. **`AdaptiveNavBar`**: A pixel-perfect, pure Flutter replica of Apple App Store's adaptive bottom navigation bar system. It reads the content scrolling beneath it, adapting its surface blur, label tint, and active highlight pills dynamically.
 
 <p align="center">
   <img src="assets/demo.gif" alt="adaptive_foreground demo" width="320"/>
@@ -19,13 +18,12 @@ status-bar icons in sync.
 
 | Feature | Details |
 |---|---|
-| **Luminance-based selection** | Computes background brightness and returns the highest-contrast foreground. |
-| **Live backdrop sampling** | Periodically captures a low-resolution snapshot of a `RepaintBoundary` to sample the actual rendered pixels — works with gradients, images, and animated backgrounds. |
-| **Status-bar sync** | Optionally keeps `SystemUiOverlayStyle` in sync with the resolved color via `AnnotatedRegion`. |
-| **Smooth transitions** | Color changes animate with a 300 ms `ColorTween`. |
-| **InheritedWidget propagation** | Every descendant can read the resolved foreground color with a single `AppAdaptiveForeground.of(context)` call. |
-| **Cross-platform button** | `AppButtonIosAndroid` renders a native iOS `CNButton` on iOS and a Material circular button on Android. |
-| **Zero heavy dependencies** | Core widget has no external deps. iOS button uses `cupertino_native`. |
+| **Luminance Backdrop Sampling** | Periodically captures low-res snapshots (0.1 scale) of a `RepaintBoundary` to calculate exact average colors and luminance behind the bar, preventing performance drop. |
+| **Surface Adaptation** | Dynamically shifts frosted glass overlays (dark tint, light tint, or warm blend) depending on background HSL values. |
+| **Contrast & Tint Flipping** | Automatically flips active/inactive label weights and color contrasts for maximum WCAG readability. |
+| **Vibrancy & Frosted Glass** | Pure Flutter layout utilising `BackdropFilter` and `ImageFilter.blur(sigmaX: 20, sigmaY: 20)` overlay with micro-thin adaptive borders. |
+| **Status-bar Sync** | Automatically syncs `SystemUiOverlayStyle` brightness flags. |
+| **Debounced Sampling** | Limits sampling interval to 100ms+ and runs smooth 250ms curve transitions to prevent visual flickers. |
 
 ---
 
@@ -37,7 +35,7 @@ dependencies:
 ```
 
 ```dart
-import 'package:adaptive_foreground/adaptive_foreground.dart';
+import 'package:adaptive_foreground/flutter_adaptive_foreground.dart';
 ```
 
 ---
@@ -75,6 +73,61 @@ final foreground = AppAdaptiveForeground.of(context);        // Color
 final background = AppAdaptiveForeground.backgroundColorOf(context); // Color
 final style      = AppAdaptiveForeground.systemStyleOf(context);     // SystemUiOverlayStyle
 ```
+
+### 2 — `AdaptiveNavBar` Quick Start
+
+To use the Apple App Store style navigation bar, arrange your screen with a `Stack` where the scrollable list is in the background and the `AdaptiveNavBar` sits at the bottom:
+
+```dart
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: Stack(
+      children: [
+        // Ensure scrollable content is wrapped in a RepaintBoundary
+        RepaintBoundary(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Container(height: 500, color: Colors.black),
+                Container(height: 500, color: Colors.white),
+              ],
+            ),
+          ),
+        ),
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: AdaptiveNavBar(
+            items: const [
+              AdaptiveNavBarItem(icon: Icons.today, label: 'Today'),
+              AdaptiveNavBarItem(icon: Icons.rocket_launch, label: 'Games'),
+              AdaptiveNavBarItem(icon: Icons.layers, label: 'Apps'),
+              AdaptiveNavBarItem(icon: Icons.sports_esports, label: 'Arcade'),
+              AdaptiveNavBarItem(icon: Icons.search, label: 'Search'),
+            ],
+            currentIndex: _currentIndex,
+            onTap: (index) => setState(() => _currentIndex = index),
+            accentColor: Colors.blue,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+```
+
+---
+
+## Adaptive Behavior Rules
+
+| Backdrop State | Sampled Value | Frosted Surface Material | Inactive Labels / Symbols | Active Item Highlight |
+|---|---|---|---|---|
+| **Dark content** | Luminance < 0.5 | Translucent dark overlay `(Opacity 15% black)` | Translucent white `(Opacity 50%)` | Filled accent color + Subtle dark pill background |
+| **Light content** | Luminance ≥ 0.5 | Translucent white overlay `(Opacity 15% white)` | Translucent black `(Opacity 50%)` | Filled accent color + Subtle light pill background |
+| **Warm content** | Warm hue range | Translucent warm overlay `(Opacity 15% warm)` | Translucent black `(Opacity 50%)` | Filled accent color + Subtle light pill background |
+| **Neutral gray** | Saturation = 0.0 | Neutral gray blur layer | Slate black `(Opacity 50%)` | Filled accent color + Subtle light pill background |
 
 ---
 
@@ -144,6 +197,29 @@ Color bg = AppAdaptiveForeground.backgroundColorOf(context);
 // Resolved SystemUiOverlayStyle
 SystemUiOverlayStyle style = AppAdaptiveForeground.systemStyleOf(context);
 ```
+
+---
+
+### `AdaptiveNavBar`
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `items` | `List<AdaptiveNavBarItem>` | required | List of tabs to display in the navigation bar. |
+| `currentIndex` | `int` | required | Index of the active tab. |
+| `onTap` | `ValueChanged<int>` | required | Triggered when a tab gets tapped. |
+| `accentColor` | `Color` | `Colors.blue` | Highlights the active item's icon, text, and active badge. |
+| `blurSigma` | `double` | `20.0` | Background Gaussian frosted blur standard deviation strength. |
+| `adaptationThreshold` | `double` | `0.5` | Threshold mapping between light/dark backdrops. |
+| `animationDuration` | `Duration` | `250 ms` | Duration for smooth cross-fading color shifts. |
+| `onDebugUpdate` | `Function?` | `null` | Invoked with real-time statistics (luminance, avg color, brightness, opacity) for debug overlays. |
+
+---
+
+### `AdaptiveNavBarItem`
+
+Contains tab data models:
+- **`icon`** (`IconData`): Tab icon graphics.
+- **`label`** (`String`): Text label drawn under the icon.
 
 ---
 

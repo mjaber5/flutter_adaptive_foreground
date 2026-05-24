@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.0.3] - 2026-05-23
+
+### Added
+- `AdaptiveNavBar` widget — a pixel-perfect, pure-Flutter replica of the Apple App Store's adaptive frosted glass bottom navigation bar.
+- `CNSymbol` and `CNTabBar` integrations from `cupertino_native` inside the example application to show authentic platform tab bars on iOS.
+- Dynamic `AdaptiveTheme` resolving surface blurs, inactive elements tints, dynamic active highlight pills, and micro-thin top borders.
+- Isolated, low-resolution pixel sampling in `BrightnessSampler` with debouncing (> 100ms) and smooth transitions (250ms curve).
+- Dedicated widget and unit test coverage in `test/adaptive_nav_bar_test.dart` asserting correct rendering, taps, and theme color maps.
+
+---
+
 ## [0.0.2] - 2026-05-08
 
 ### Fixed

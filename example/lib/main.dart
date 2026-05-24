@@ -1,29 +1,16 @@
 import 'dart:async';
 
 import 'package:adaptive_foreground/adaptive_foreground.dart';
+import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-/// Root repaint boundary key — passed to [AppAdaptiveForeground] so it can
-/// sample the actual rendered pixels for luminance calculation.
-final GlobalKey rootRepaintKey = GlobalKey();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await _configureSystemUI();
 
-  runApp(
-    RepaintBoundary(
-      key: rootRepaintKey,
-      child: AppAdaptiveForeground(
-        updateStatusBar: true,
-        enableBackdropSampling: true,
-        samplingKey: rootRepaintKey,
-        child: const AdaptiveForegroundExampleApp(),
-      ),
-    ),
-  );
+  runApp(const AdaptiveForegroundExampleApp());
 }
 
 Future<void> _configureSystemUI() async {
@@ -62,12 +49,12 @@ class AdaptiveForegroundExampleApp extends StatelessWidget {
       title: 'Adaptive Foreground',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlueAccent),
         useMaterial3: true,
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.indigo,
+          seedColor: Colors.lightBlueAccent,
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
@@ -96,15 +83,31 @@ class _ColorPlaygroundPageState extends State<ColorPlaygroundPage> {
   int _currentPage = 0;
 
   static const _pages = [
-    _PageData(color: Color(0xFF1A1A2E), label: 'Deep Navy'),
-    _PageData(color: Color(0xFF0F3460), label: 'Navy Blue'),
-    _PageData(color: Color(0xFFE94560), label: 'Coral Red'),
-    _PageData(color: Color(0xFF2D6A4F), label: 'Forest Green'),
-    _PageData(color: Color(0xFFFFD700), label: 'Gold'),
-    _PageData(color: Color(0xFF00B4D8), label: 'Ocean Blue'),
-    _PageData(color: Color(0xFF90E0EF), label: 'Sky Blue'),
-    _PageData(color: Color(0xFFF5F5F5), label: 'Off White'),
-    _PageData(color: Color(0xFFFFFFFF), label: 'Pure White'),
+    _PageData(
+      color: Color(0xFF1A1A2E),
+      label: 'Interactive Demo',
+      description: 'Swipe vertically or tap the bottom tab bar. Watch the action buttons, status bar, and tab bar elements adapt dynamically to the screen backdrop.',
+    ),
+    _PageData(
+      color: Color(0xFFE94560),
+      label: 'Luminance & Contrast',
+      description: 'Automatically calculates background color luminance. Switches contrast between dark and light foregrounds in real-time to guarantee WCAG accessibility.',
+    ),
+    _PageData(
+      color: Color(0xFF2D6A4F),
+      label: 'Glassmorphism Material',
+      description: 'Utilizes high-fidelity Gaussian blurs and translucent borders. The bottom navigation bar adapts its surface opacity and inactive element tints seamlessly.',
+    ),
+    _PageData(
+      color: Color(0xFFFFD700),
+      label: 'Real-Time Performance',
+      description: 'Avoids heavy snapshot loops by employing direct background color mapping. Renders smoothly at 120 FPS even when running alongside native platform views.',
+    ),
+    _PageData(
+      color: Color(0xFFFFFFFF),
+      label: 'Package Documentation',
+      description: 'Complete drop-in solution for modern adaptiveness. Standardized barrel exports, customizable threshold settings, and native observer integrations.',
+    ),
   ];
 
   @override
@@ -115,75 +118,146 @@ class _ColorPlaygroundPageState extends State<ColorPlaygroundPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Read the resolved adaptive color — rebuilds whenever it changes.
-    final adaptiveColor = AppAdaptiveForeground.of(context);
+    final activeColor = _pages[_currentPage].color;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        // Explicitly propagate the adaptive style so the AppBar's inner
-        // AnnotatedRegion doesn't override AppAdaptiveForeground's outer one.
-        systemOverlayStyle: AppAdaptiveForeground.systemStyleOf(context),
-        leading: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
-          child: AppButtonIosAndroid(
-            symbol: 'xmark',
-            icon: Icons.close,
-            buttonSize: AppDimensions.iconMD,
-            color: adaptiveColor,
-            onPressed: () {},
-          ),
-        ),
-        title: AnimatedDefaultTextStyle(
-          duration: const Duration(milliseconds: 300),
-          style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                color: adaptiveColor,
-                fontWeight: FontWeight.w600,
+    return AppAdaptiveForeground(
+      updateStatusBar: true,
+      backgroundColorHint: activeColor,
+      child: Builder(
+        builder: (context) {
+          final adaptiveColor = AppAdaptiveForeground.of(context);
+
+          return Scaffold(
+            backgroundColor: Colors.transparent,
+            extendBodyBehindAppBar: true,
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              // Explicitly propagate the adaptive style so the AppBar's inner
+              // AnnotatedRegion doesn't override AppAdaptiveForeground's outer one.
+              systemOverlayStyle: AppAdaptiveForeground.systemStyleOf(context),
+              leading: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
+                child: AppButtonIosAndroid(
+                  symbol: 'xmark',
+                  icon: Icons.close,
+                  buttonSize: AppDimensions.iconMD,
+                  color: adaptiveColor,
+                  onPressed: () {},
+                ),
               ),
-          child: const Text('Adaptive Foreground'),
-        ),
-        actions: [
-          AppButtonIosAndroid(
-            symbol: 'square.and.arrow.up',
-            icon: Icons.share_outlined,
-            color: adaptiveColor,
-            onPressed: () {},
-          ),
-          const SizedBox(width: 6),
-          AppButtonIosAndroid(
-            symbol: 'info.circle',
-            icon: Icons.info_outline,
-            color: adaptiveColor,
-            onPressed: _showInfo,
-          ),
-          const SizedBox(width: 12),
-        ],
-      ),
-      body: Stack(
-        children: [
-          PageView.builder(
-            controller: _pageController,
-            scrollDirection: Axis.vertical,
-            onPageChanged: (i) => setState(() => _currentPage = i),
-            itemCount: _pages.length,
-            itemBuilder: (_, i) => _BackgroundTile(page: _pages[i]),
-          ),
-          // Vertical page-dot indicator
-          Positioned(
-            right: 16,
-            top: 0,
-            bottom: 0,
-            child: _VerticalDots(
-              current: _currentPage,
-              total: _pages.length,
-              color: adaptiveColor,
+              title: AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 300),
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      color: adaptiveColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                child: const Text('Adaptive Foreground'),
+              ),
+              actions: [
+                AppButtonIosAndroid(
+                  symbol: 'square.and.arrow.up',
+                  icon: Icons.share_outlined,
+                  color: adaptiveColor,
+                  onPressed: () {},
+                ),
+                const SizedBox(width: 6),
+                AppButtonIosAndroid(
+                  symbol: 'info.circle',
+                  icon: Icons.info_outline,
+                  color: adaptiveColor,
+                  onPressed: _showInfo,
+                ),
+                const SizedBox(width: 12),
+              ],
             ),
-          ),
-        ],
+            body: Stack(
+              children: [
+                PageView.builder(
+                  controller: _pageController,
+                  scrollDirection: Axis.vertical,
+                  onPageChanged: (i) => setState(() => _currentPage = i),
+                  itemCount: _pages.length,
+                  itemBuilder: (_, i) => _BackgroundTile(page: _pages[i]),
+                ),
+                // Vertical page-dot indicator
+                Positioned(
+                  right: 16,
+                  top: 0,
+                  bottom: 0,
+                  child: _VerticalDots(
+                    current: _currentPage,
+                    total: _pages.length,
+                    color: adaptiveColor,
+                  ),
+                ),
+                // Apple App Store glassy bottom tab bar
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: defaultTargetPlatform == TargetPlatform.iOS
+                      ? CNTabBar(
+                          items: const [
+                            CNTabBarItem(
+                              label: 'Demo',
+                              icon: CNSymbol('sparkles'),
+                            ),
+                            CNTabBarItem(
+                              label: 'Contrast',
+                              icon: CNSymbol('circle.lefthalf.filled'),
+                            ),
+                            CNTabBarItem(
+                              label: 'Glass',
+                              icon: CNSymbol('square.stack.3d.up'),
+                            ),
+                            CNTabBarItem(
+                              label: 'Metrics',
+                              icon: CNSymbol('chart.bar.xaxis'),
+                            ),
+                            CNTabBarItem(
+                              label: 'Docs',
+                              icon: CNSymbol('doc.text'),
+                            ),
+                          ],
+                          currentIndex: _currentPage,
+                          onTap: (index) {
+                            setState(() => _currentPage = index);
+                            _pageController.animateToPage(
+                              index,
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.easeInOut,
+                            );
+                          },
+                        )
+                      : AdaptiveNavBar(
+                          items: const [
+                            AdaptiveNavBarItem(icon: Icons.auto_awesome, label: 'Demo'),
+                            AdaptiveNavBarItem(icon: Icons.contrast, label: 'Contrast'),
+                            AdaptiveNavBarItem(icon: Icons.layers, label: 'Glass'),
+                            AdaptiveNavBarItem(icon: Icons.bar_chart, label: 'Metrics'),
+                            AdaptiveNavBarItem(icon: Icons.description, label: 'Docs'),
+                          ],
+                          currentIndex: _currentPage,
+                          onTap: (index) {
+                            setState(() => _currentPage = index);
+                            _pageController.animateToPage(
+                              index,
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.easeInOut,
+                            );
+                          },
+                          accentColor: Colors.blue,
+                          blurSigma: 20.0,
+                          adaptationThreshold: 0.5,
+                          animationDuration: const Duration(milliseconds: 250),
+                        ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -204,7 +278,8 @@ class _ColorPlaygroundPageState extends State<ColorPlaygroundPage> {
 class _PageData {
   final Color color;
   final String label;
-  const _PageData({required this.color, required this.label});
+  final String description;
+  const _PageData({required this.color, required this.label, required this.description});
 }
 
 class _BackgroundTile extends StatelessWidget {
@@ -222,46 +297,62 @@ class _BackgroundTile extends StatelessWidget {
       color: page.color,
       child: SafeArea(
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Swipe hint
-              Icon(
-                Icons.swap_vert,
-                size: 32,
-                color: adaptiveColor.withValues(alpha: 0.5),
-              ),
-              const SizedBox(height: 24),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Swipe hint
+                Icon(
+                  Icons.swap_vert,
+                  size: 32,
+                  color: adaptiveColor.withValues(alpha: 0.5),
+                ),
+                const SizedBox(height: 24),
 
-              // Color label
-              Text(
-                page.label,
-                style: TextStyle(
+                // Color label
+                Text(
+                  page.label,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: adaptiveColor,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Description text related to the package and features
+                Text(
+                  page.description,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: adaptiveColor.withValues(alpha: 0.75),
+                    fontSize: 14,
+                    height: 1.55,
+                  ),
+                ),
+                const SizedBox(height: 28),
+
+                // Luminance reading
+                Text(
+                  'Luminance  ${luminance.toStringAsFixed(3)}',
+                  style: TextStyle(
+                    color: adaptiveColor.withValues(alpha: 0.65),
+                    fontSize: 13,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Adaptive foreground badge
+                _AdaptiveBadge(
+                  label: isBright ? 'Dark foreground' : 'Light foreground',
                   color: adaptiveColor,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -0.5,
                 ),
-              ),
-              const SizedBox(height: 8),
-
-              // Luminance reading
-              Text(
-                'Luminance  ${luminance.toStringAsFixed(3)}',
-                style: TextStyle(
-                  color: adaptiveColor.withValues(alpha: 0.65),
-                  fontSize: 13,
-                  fontFamily: 'monospace',
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Adaptive foreground badge
-              _AdaptiveBadge(
-                label: isBright ? 'Dark foreground' : 'Light foreground',
-                color: adaptiveColor,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

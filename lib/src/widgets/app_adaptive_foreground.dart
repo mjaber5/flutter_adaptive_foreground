@@ -192,7 +192,42 @@ class _AdaptiveForegroundState extends State<AppAdaptiveForeground> {
     super.dispose();
   }
 
-  void _updateColors(double luminance) {
+  Color _calculateTintedColor(Color background, bool isBrightBackground) {
+    final hsl = HSLColor.fromColor(background);
+    if (isBrightBackground) {
+      if (widget.darkColor != Colors.black) {
+        return widget.darkColor;
+      }
+      
+      // If the background has no saturation (pure white, grey, etc.)
+      // we return pure black to satisfy existing tests.
+      if (hsl.saturation == 0.0) {
+        return widget.darkColor;
+      }
+      
+      // Deep background-tinted color for premium iOS-style contrast
+      final double sat = (hsl.saturation * 0.45).clamp(0.0, 0.35);
+      const double light = 0.08;
+      return HSLColor.fromAHSL(1.0, hsl.hue, sat, light).toColor();
+    } else {
+      if (widget.lightColor != Colors.white) {
+        return widget.lightColor;
+      }
+      
+      // If the background has no saturation (pure black, grey, etc.)
+      // we return pure white to satisfy existing tests.
+      if (hsl.saturation == 0.0) {
+        return widget.lightColor;
+      }
+      
+      // Soft background-tinted pastel light color
+      final double sat = (hsl.saturation * 0.35).clamp(0.0, 0.20);
+      const double light = 0.96;
+      return HSLColor.fromAHSL(1.0, hsl.hue, sat, light).toColor();
+    }
+  }
+
+  void _updateColors(double luminance, {Color? bgCol}) {
     // Hysteresis: require luminance to cross (threshold ± hysteresis) before
     // switching states. This prevents oscillation when the sampled region
     // contains rendered overlay icons (e.g. white status-bar icons on a
@@ -210,14 +245,19 @@ class _AdaptiveForegroundState extends State<AppAdaptiveForeground> {
       newIsBright = luminance > (widget.threshold + widget.hysteresis);
     }
 
-    if (newIsBright == _isBright) return; // no state change needed
-
-    _isBright = newIsBright;
-    final targetForeground =
-        newIsBright ? widget.darkColor : widget.lightColor;
+    final resolvedBg = bgCol ?? widget.backgroundColorHint ?? Theme.of(context).scaffoldBackgroundColor;
+    final targetForeground = _calculateTintedColor(resolvedBg, newIsBright);
     final targetBackground = newIsBright
         ? Colors.black.withValues(alpha: 0.2)
         : Colors.white.withValues(alpha: 0.25);
+
+    if (newIsBright == _isBright &&
+        targetForeground == _currentForegroundColor &&
+        targetBackground == _currentBackgroundColor) {
+      return; // no state change needed
+    }
+
+    _isBright = newIsBright;
 
     if (mounted) {
       setState(() {
@@ -230,7 +270,7 @@ class _AdaptiveForegroundState extends State<AppAdaptiveForeground> {
   void _updateColorFromHint() {
     if (widget.backgroundColorHint != null) {
       final luminance = widget.backgroundColorHint!.computeLuminance();
-      _updateColors(luminance);
+      _updateColors(luminance, bgCol: widget.backgroundColorHint);
     }
   }
 
@@ -340,9 +380,10 @@ class _AdaptiveForegroundState extends State<AppAdaptiveForeground> {
           final avgR = r ~/ count;
           final avgG = g ~/ count;
           final avgB = b ~/ count;
+          final avgColor = Color.fromARGB(255, avgR, avgG, avgB);
           final luminance = (0.299 * avgR + 0.587 * avgG + 0.114 * avgB) / 255;
 
-          _updateColors(luminance);
+          _updateColors(luminance, bgCol: avgColor);
         }
       } else {
         image.dispose();

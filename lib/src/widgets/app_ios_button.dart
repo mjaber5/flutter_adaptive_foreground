@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 /// the `cupertino_native` package.
 ///
 /// Only rendered on iOS — use [AppButtonIosAndroid] for a cross-platform
-/// button that automatically falls back to a Material style on Android.
+/// button that automatically falls ba
+/// ck to a Material style on Android.
 class AppIosButton extends StatelessWidget {
   const AppIosButton({
     super.key,

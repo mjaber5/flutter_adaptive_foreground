@@ -23,7 +23,7 @@ linter:
 
     # --- Style (package-level) ---
     avoid_print: true
-    avoid_relative_import_of_lib_files: true
+    avoid_relative_lib_imports: true
     prefer_const_constructors: true
     prefer_const_declarations: true
     prefer_final_fields: true

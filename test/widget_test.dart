@@ -169,5 +169,26 @@ void main() {
       await tester.pumpAndSettle();
       expect(captured, equals(Colors.white)); // dark bg → light fg
     });
+
+    testWidgets('dynamic HSL-based tinted color returned for saturated backgrounds', (tester) async {
+      Color? captured;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: AppAdaptiveForeground(
+            backgroundColorHint: const Color(0xFF0F3460), // Navy Blue (dark background)
+            child: Builder(builder: (ctx) {
+              captured = AppAdaptiveForeground.of(ctx);
+              return const SizedBox.shrink();
+            }),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // For Navy Blue, it should return a beautiful ice-blue tinted light color
+      expect(captured, isNot(equals(Colors.white)));
+      expect(captured?.computeLuminance(), greaterThan(0.8));
+    });
   });
 }
