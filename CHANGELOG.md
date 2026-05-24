@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.0.3] - 2026-05-23
+## [0.0.3] - 2026-05-24
 
 ### Added
 - `AdaptiveNavBar` widget — a pixel-perfect, pure-Flutter replica of the Apple App Store's adaptive frosted glass bottom navigation bar.
@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dynamic `AdaptiveTheme` resolving surface blurs, inactive elements tints, dynamic active highlight pills, and micro-thin top borders.
 - Isolated, low-resolution pixel sampling in `BrightnessSampler` with debouncing (> 100ms) and smooth transitions (250ms curve).
 - Dedicated widget and unit test coverage in `test/adaptive_nav_bar_test.dart` asserting correct rendering, taps, and theme color maps.
+
+### Fixed
+- Relocated `AppAdaptiveForeground` context inside `ColorPlaygroundPage` using direct background color hint mapping, completely bypassing fragile screen captures and resolving Platform View compositing conflicts on iOS.
+- Restored explicit `tint: color` on iOS native buttons to ensure native visual glass effects adapt dynamically to contrast state.
+- Upgraded Android circular action buttons to implement high-performance `BackdropFilter` glassmorphism blurs and `AnimatedContainer` transitions matching iOS tab bar aesthetics.
+- Custom-themed all example swiper pages and bottom tab items (Demo, Contrast, Glass, Metrics, Docs) to focus entirely on showcasing package features and guides.
 
 ---
 
