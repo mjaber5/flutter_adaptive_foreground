@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.0.4] - 2026-05-24
+
+### Fixed
+- Fixed broken relative `demo.gif` path in `README.md` by utilizing absolute raw GitHub URLs so that project visualizer media renders flawlessly on pub.dev.
+
+---
+
 ## [0.0.3] - 2026-05-24
 
 ### Added
